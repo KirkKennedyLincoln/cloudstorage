@@ -51,6 +51,11 @@ class CloudStorageApplicationTests {
 	// 	Assertions.assertEquals("Login", driver.getTitle());
 	// }
 
+	@Test
+	public void getDownloadFile() {
+		driver.get("http://localhost:" + this.port + "/download");
+	}
+
 	/**
 	 * PLEASE DO NOT DELETE THIS method.
 	 * Helper method for Udacity-supplied sanity checks.
