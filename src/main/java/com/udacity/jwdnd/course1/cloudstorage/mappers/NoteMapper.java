@@ -2,12 +2,14 @@ package com.udacity.jwdnd.course1.cloudstorage.mappers;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import com.udacity.jwdnd.course1.cloudstorage.models.Note;
 
+@Mapper()
 public interface NoteMapper {
     @Insert("INSERT INTO NOTES (notetitle, notedescription, userid) " +
             "VALUES (#{note.notetitle}, #{note.notedescription}, #{note.userid})")

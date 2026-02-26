@@ -1,11 +1,18 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
+import org.springframework.stereotype.Service;
+
 import com.udacity.jwdnd.course1.cloudstorage.mappers.FileMapper;
 import com.udacity.jwdnd.course1.cloudstorage.models.File;
 
+@Service
 public class FileService {
 
-    private FileMapper fileMapper;
+    private final FileMapper fileMapper;
+
+    public FileService(FileMapper fileMapper) {
+        this.fileMapper = fileMapper;
+    }
    
     public Boolean addNewFile(File file) {
         int addedFile = fileMapper.insertFile(file);

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,8 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.udacity.jwdnd.course1.cloudstorage.models.File;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 
+@Controller
 public class FileController {
-    private FileService fileService;
+    private final FileService fileService;
+
+    public FileController(FileService fileService) {
+        this.fileService = fileService;
+    }
+
 
    @GetMapping(
         value = "/download/{filename}",
@@ -44,25 +51,27 @@ public class FileController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFileStreaming(@RequestPart("fileUpload") MultipartFile filePart) 
+    public String uploadFileStreaming(@RequestParam("fileUpload") MultipartFile filePart) 
         throws IOException {
         
         Path targetPath = Paths.get("target", "files").resolve(filePart.getOriginalFilename());
         System.out.println(targetPath);
         try (InputStream inputStream = filePart.getInputStream(); OutputStream outputStream = Files.newOutputStream(targetPath)) {
             inputStream.transferTo(outputStream);
-
-            File newFile = new File(
-                "test1",
-                "application/text",
-                0L,
-                100,
-                inputStream.readAllBytes()   
-            );
-
-            fileService.addNewFile(newFile);
         }
+            
+        byte[] fileBytes = Files.readAllBytes(targetPath);
+        System.out.println(fileBytes);
+        File newFile = new File(
+            filePart.getOriginalFilename(),
+            filePart.getContentType(),
+            filePart.getSize(),
+            100,
+            fileBytes                  
+        );
 
-        return ResponseEntity.ok("Upload successful: " + filePart.getOriginalFilename());
+        fileService.addNewFile(newFile);
+
+        return "redirect:/home";
     }
 }

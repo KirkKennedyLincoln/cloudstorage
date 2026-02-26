@@ -1,8 +1,11 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
+import org.springframework.stereotype.Service;
+
 import com.udacity.jwdnd.course1.cloudstorage.mappers.NoteMapper;
 import com.udacity.jwdnd.course1.cloudstorage.models.Note;
 
+@Service
 public class NoteService {
 
     private NoteMapper noteMapper;
