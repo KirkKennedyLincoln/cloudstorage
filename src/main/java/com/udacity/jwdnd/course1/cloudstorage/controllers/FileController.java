@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,12 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.udacity.jwdnd.course1.cloudstorage.models.File;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 
 @Controller
+@RestController
 public class FileController {
     private final FileService fileService;
 
@@ -66,12 +69,20 @@ public class FileController {
             filePart.getOriginalFilename(),
             filePart.getContentType(),
             filePart.getSize(),
-            100,
+            4,
             fileBytes                  
         );
 
-        fileService.addNewFile(newFile);
-
+        boolean result = fileService.addNewFile(newFile);
+        System.out.println("Result from fileService " + result);
         return "redirect:/home";
     }
+
+    @GetMapping("/api/list-files")
+    public List<String> getFilenames() {
+        List<String> filenames = this.fileService.fetchAllFilenames();
+        System.out.println(filenames);
+        return filenames;
+    }
+    
 }
