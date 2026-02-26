@@ -13,8 +13,9 @@ import com.udacity.jwdnd.course1.cloudstorage.models.File;
 
 @Mapper()
 public interface FileMapper {
-    @Insert("INSERT INTO FILES (filename, contenttype, filesize, userid, filedata) " +
-            "VALUES (#{file.filename}, #{file.contenttype}, #{file.filesize}, #{file.userid}, #{file.filedata})")
+    @Insert("INSERT INTO FILES (filename, contenttype, filesize, userid, filedata) \n" +
+            "VALUES (#{file.filename}, #{file.contenttype}, #{file.filesize}, #{file.userid}, #{file.filedata})\n" +
+            "")
     int insertFile(@Param("file") File file);
 
     @Select("SELECT filename, contenttype, filesize, userid, filedata FROM FILES WHERE filename = #{filename}")
@@ -33,4 +34,7 @@ public interface FileMapper {
 
     @Delete("DELETE FROM FILES WHERE fileId = #{fileId}")
     public Boolean deleteFileByFileId(@Param("fileId") Integer fileId);
+
+    @Select("SELECT filename FROM FILES WHERE filename LIKE #{filename}" )
+    public List<String> getAllFilenamesLike(@Param("filename") String filename);
 }

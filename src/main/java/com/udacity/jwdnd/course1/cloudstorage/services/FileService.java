@@ -41,4 +41,9 @@ public class FileService {
         System.out.println(allfiles);
         return allfiles;
     }
+
+    public List<String> fetchAllFilenamesLike(String filename) {
+        List<String> likefiles = fileMapper.getAllFilenamesLike(filename + "%");
+        return likefiles;
+    }
 }

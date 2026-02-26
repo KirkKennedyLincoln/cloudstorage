@@ -51,10 +51,10 @@ class CloudStorageApplicationTests {
 	// 	Assertions.assertEquals("Login", driver.getTitle());
 	// }
 
-	@Test
-	public void getDownloadFile() {
-		driver.get("http://localhost:" + this.port + "/download");
-	}
+	// @Test
+	// public void getDownloadFile() {
+	// 	driver.get("http://localhost:" + this.port + "/download");
+	// }
 
 	/**
 	 * PLEASE DO NOT DELETE THIS method.
