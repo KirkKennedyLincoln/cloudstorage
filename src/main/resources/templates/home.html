@@ -53,7 +53,7 @@
                             <td>
                                 <a target="_blank" onclick="showCredentialModal('${credential}')" class="btn btn-success">View</a>
                                 <button type="button" class="btn btn-success">Edit</button>
-                                <a  class="btn btn-danger" onclick="deleteCredential('${credential}')">Delete</a>
+                                <a  class="btn btn-danger" onclick="deleteCredential('${credential?.url}')">Delete</a>
                             </td>
                             <td>${credential?.username}</td>
                             <td>${credential?.password}</td>
@@ -66,6 +66,31 @@
                     console.error("Fetch error.", error);
                 }
             }
+            async function fetchNotes() {
+                try {
+                    const response = await fetch('/api/list-all-notes');
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const data = await response.json();
+                    console.log(data);
+                    const noteRows = data.map(note => `                                                                                                                                                                                                                         
+                        <tr>                                                                                                                                                                                                                                                    
+                            <td>                                                                                                                                                                                                                                                
+                                <button type="button" onclick="showNoteEditModal('${note?.noteid}', '${note?.notetitle}', '${note?.notedescription}')" class="btn btn-success">Edit</button>                                                                                        
+                                <a class="btn btn-danger" onclick="deleteNote('${note?.notetitle}')">Delete</a>                                                                                                                                                                 
+                            </td>                                                                                                                                                                                                                                               
+                            <td>${note?.notetitle}</td>                                                                                                                                                                                                                         
+                            <td>${note?.notedescription}</td>                                                                                                                                                                                                                   
+                        </tr>                                                                                                                                                                                                                                                   
+                    `).join(''); 
+
+                    document.getElementById("noteTable").innerHTML = noteRows;
+                } catch (error) {
+                    console.error("Fetch error.", error);
+                }
+            }
+
+            fetchNotes();
             fetchFilenames();
             fetchCredentials();
             async function validateUploadFile() {
@@ -99,6 +124,40 @@
 
                 console.log(data);
                 fetchFilenames();
+            }
+            async function deleteCredential(url) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                const response = await fetch(`/api/delete-credential?url=${encodeURIComponent(url)}`, {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+
+                console.log(data);
+                fetchCredentials();
+            }
+            async function deleteNote(title) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                const response = await fetch(`/api/delete-note/${encodeURIComponent(title)}`, {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+
+                console.log(data);
+                fetchNotes();
             }
         </script>
     </head>
@@ -161,8 +220,8 @@
                         </button>
 
                         <div class="table-responsive">
-                            <table class="table table-striped" id="userTable">
-                                <thead>
+                            <table class="table table-striped" id="noteTable">
+                                {% comment %} <thead>
                                     <tr>
                                         <th style="width: 20%" scope="col"></th>
                                         <th style="width: 20%" scope="col">Title</th>
@@ -178,7 +237,7 @@
                                         <th scope="row">Example Note Title</th>
                                         <td>Example Note Description </td>
                                     </tr>
-                                </tbody>
+                                </tbody> {% endcomment %}
                             </table>
                         </div>
                        <div class="modal fade" id="readModal" tabindex="-1" role="dialog" aria-labelledby="readModalLabel" aria-hidden="true" style="z-index: 1050;">
@@ -195,15 +254,15 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
-                                            <input type="hidden" name="noteId" id="note-id">
+                                        <form action="#" th:action="@{/create-note}" method="POST">
+                                            <input type="hidden" name="noteid" id="note-id">
                                             <div class="form-group">
                                                 <label for="note-title" class="col-form-label">Title</label>
-                                                <input type="text" name= "noteTitle" class="form-control" id="note-title" maxlength="20" required>
+                                                <input type="text" name= "notetitle" class="form-control" id="note-title" maxlength="20" required>
                                             </div>
                                             <div class="form-group">
                                                 <label for="note-description" class="col-form-label">Description</label>
-                                                <textarea class="form-control" name="noteDescription" id="note-description" rows="5" maxlength="1000" required></textarea>
+                                                <textarea class="form-control" name="notedescription" id="note-description" rows="5" maxlength="1000" required></textarea>
                                             </div>
                                             <button id="noteSubmit" type="submit" class="d-none"></button>
                                         </form>
@@ -216,6 +275,36 @@
                             </div>
                         </div>
                     </div>
+                        <div class="modal fade" id="noteEditModal" tabindex="-1" role="dialog" aria-labelledby="noteModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="noteModalLabel">Note</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="#" th:action="@{/update-note}" method="POST">
+                                            <input type="hidden" name="noteid" id="note-id">
+                                            <div class="form-group">
+                                                <label for="note-title" class="col-form-label">Title</label>
+                                                <input type="text" name= "notetitle" class="form-control" id="note-title" maxlength="20" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="note-description" class="col-form-label">Description</label>
+                                                <textarea class="form-control" name="notedescription" id="note-description" rows="5" maxlength="1000" required></textarea>
+                                            </div>
+                                            <button id="noteSubmit" type="submit" class="d-none"></button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary" onclick="$('#noteSubmit').click();">Save changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     <div class="tab-pane fade" id="nav-credentials" role="tabpanel" aria-labelledby="nav-credentials-tab">
                         <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showCredentialModal()">
                             + Add a New Credential
@@ -297,7 +386,12 @@
                 $('#note-description').val(noteDescription ? noteDescription : '');
                 $('#noteModal').modal('show');
             }
-
+            function showNoteEditModal(noteId, noteTitle, noteDescription) {
+                $('#note-id').val(noteId ? noteId : '');
+                $('#note-title').val(noteTitle ? noteTitle : '');
+                $('#note-description').val(noteDescription ? noteDescription : '');
+                $('#noteModal').modal('show');
+            }
             async function showReadModal(filename) {
                 const fileText = await fetch(`/api/file-content?filename=${encodeURIComponent(filename)}`)
                 const text = await fileText.text();
@@ -314,6 +408,15 @@
                 $('#credential-username').val(username ? username : '');
                 $('#credential-password').val(password ? password : '');
                 $('#credentialModal').modal('show');
+            }
+
+            // Activate tab from URL parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            if (tab === 'notes') {
+                $('#nav-notes-tab').tab('show');
+            } else if (tab === 'credentials') {
+                $('#nav-credentials-tab').tab('show');
             }
         </script>
     </body>

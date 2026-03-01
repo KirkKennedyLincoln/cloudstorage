@@ -12,17 +12,20 @@ import com.udacity.jwdnd.course1.cloudstorage.models.Note;
 @Mapper()
 public interface NoteMapper {
     @Insert("INSERT INTO NOTES (notetitle, notedescription, userid) " +
-            "VALUES (#{note.notetitle}, #{note.notedescription}, #{note.userid})")
-    int insertNote(@Param("note") Note note);
+            "VALUES (#{note.notetitle}, #{note.notedescription}, #{userid})")
+    int insertNote(@Param("note") Note note, @Param("userid") Integer userid);
 
-    @Select("SELECT noteid FROM NOTES WHERE notetitle = #{notetitle}")
+    @Select("SELECT noteid, notetitle, notedescription FROM NOTES WHERE notetitle = #{notetitle}")
     public Note getNoteByNotetitle(@Param("notetitle") String notetitle);
 
-    @Select("SELECT noteid FROM NOTES WHERE notetitle = #{notetitle}")
-    public Integer getNoteIdByNotetitle(@Param("notetitle") String notetitle);
+    @Select("SELECT noteid FROM NOTES WHERE notetitle = #{notetitle} AND userid = #{userId}")
+    public Integer getNoteIdByNotetitle(@Param("notetitle") String notetitle, Integer userId);
 
-    @Update("UPDATE NOTES SET (\n" + 
-    "notetitle = #{note.notetitle}, notedescription = #{note.notedescription}, userid = #{note.userid})\n" +
+    @Select("SELECT noteid, notetitle, notedescription FROM NOTES WHERE userid = #{userId}")
+    public Note[] getAllNotes(Integer userId);
+
+    @Update("UPDATE NOTES SET \n" + 
+    "notetitle = #{note.notetitle}, notedescription = #{note.notedescription} \n" +
     "WHERE noteid = #{noteid}")
     Boolean updateNoteByNoteId(@Param("noteid") Integer noteid, @Param("note") Note note);
 

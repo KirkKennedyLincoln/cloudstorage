@@ -108,14 +108,8 @@ public class CredentialController {
             return "/home";
         }
         credential.setCredentialkey(UUID.randomUUID().toString());
-        Boolean made = this.credentialService.addCredentials(credential, user.getUsername());
-        System.out.println(made);
-        if (made) {
-            model.addAttribute("credentialSuccess", "Credentials successfully recieved!");
-        } else {
-            model.addAttribute("credentialError", "Credentials not created");
-        }
-        return "/home";
+        this.credentialService.addCredentials(credential, user.getUsername());
+        return "redirect:/home?tab=credentials";
     }
 
 }

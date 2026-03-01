@@ -33,8 +33,7 @@ public class CredentialService {
 
     public Boolean deleteCredential(String url, String username) {
         Integer userId = this.userMapper.getUserIdByUsername(username);
-        String key = this.credentialMapper.retrieveCredentialKey(url, userId);
-        return this.credentialMapper.deleteCredentials(key, userId);
+        return this.credentialMapper.deleteCredentials(url, userId);
     }
 
     public Boolean updateCredential(Credential credential, String username) {

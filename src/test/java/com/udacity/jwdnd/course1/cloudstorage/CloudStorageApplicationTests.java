@@ -213,5 +213,15 @@ class CloudStorageApplicationTests {
 	}
 
 
+	@Test
+	public void createNote() {}
 
+	@Test
+	public void createCredential() {}
+
+	@Test
+	public void deleteNote() {}
+
+	@Test
+	public void deleteCredential() {}
 }

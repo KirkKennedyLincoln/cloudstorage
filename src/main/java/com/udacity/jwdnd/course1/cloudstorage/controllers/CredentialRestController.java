@@ -4,13 +4,17 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.udacity.jwdnd.course1.cloudstorage.models.Credential;
 import com.udacity.jwdnd.course1.cloudstorage.models.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import org.springframework.web.bind.annotation.RequestBody;
+
 
 @RestController
 public class CredentialRestController {
@@ -37,5 +41,16 @@ public class CredentialRestController {
         return collection;
     }
 
+    @PostMapping("/api/delete-credential")
+    public Boolean deleteCredential(@RequestParam("url") String url) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        if (null == user) {
+            return false;
+        }
 
+        String username = user.getUsername();
+        return this.credentialService.deleteCredential(url, username);
+    }
+    
 }

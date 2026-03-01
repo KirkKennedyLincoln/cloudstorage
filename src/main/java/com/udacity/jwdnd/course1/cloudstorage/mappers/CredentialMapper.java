@@ -26,8 +26,8 @@ public interface CredentialMapper {
     @Select("SELECT url, username, password FROM CREDENTIALS WHERE userid = #{userId}")
     public Credential[] retrieveAllCredentials(Integer userId);
 
-    @Delete("DELETE FROM CREDENTIALS WHERE credentialkey = #{credentialkey} AND userid = #{userId}")
-    public Boolean deleteCredentials(String credentialkey, Integer userId);
+    @Delete("DELETE FROM CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
+    public Boolean deleteCredentials(String url, Integer userId);
 
     @Update("UPDATE CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
     public Boolean updateCredentials(Credential credential, Integer userId);

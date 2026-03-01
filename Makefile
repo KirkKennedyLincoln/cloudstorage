@@ -8,4 +8,4 @@ restore:
 
 .PHONY: read
 read:
-	docker exec -i cloudstorage-db psql -U postgres -d registration -c "SELECT * FROM CREDENTIALS"                                                                                                                                                              
+	docker exec -i cloudstorage-db psql -U postgres -d registration -c "SELECT * FROM NOTES"                                                                                                                                                              
