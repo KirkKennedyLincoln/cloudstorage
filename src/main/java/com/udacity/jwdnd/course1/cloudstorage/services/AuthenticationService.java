@@ -21,7 +21,8 @@ public class AuthenticationService implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(
-            org.springframework.security.core.Authentication authentication) {
+            org.springframework.security.core.Authentication authentication
+    ) {
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
         System.out.println(password);

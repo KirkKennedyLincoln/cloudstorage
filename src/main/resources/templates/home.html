@@ -3,7 +3,8 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
         <link rel="stylesheet" type="text/css" media="all" th:href="@{/css/bootstrap.min.css}">
 
         <title>Home</title>
@@ -20,7 +21,7 @@
 
                             <td>
                                 <a target="_blank" onclick="showReadModal('${filename}')" class="btn btn-success">View</a>
-                                <a  class="btn btn-danger">Delete</a>
+                                <a  class="btn btn-danger" onclick="deleteFile('${filename}')">Delete</a>
                             </td>
                             <td>${filename}</td>
                         </tr>
@@ -32,8 +33,41 @@
                 }
             }
 
-            fetchFilenames();
+            async function fetchCredentials() {
+                try {
+                    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+                    const response = await fetch('/api/list-all-credentials', {
+                        method: 'POST',
+                        headers: {
+                            [csrfHeader]: csrfToken
+                        }
+                    });
+                    if (!response.ok) throw new Error('Network response was not ok');
 
+                    const data = await response.json();
+                    console.log(data);
+                    const credentialRows = data.map(credential => `
+                        <tr>
+
+                            <td>
+                                <a target="_blank" onclick="showCredentialModal('${credential}')" class="btn btn-success">View</a>
+                                <button type="button" class="btn btn-success">Edit</button>
+                                <a  class="btn btn-danger" onclick="deleteCredential('${credential}')">Delete</a>
+                            </td>
+                            <td>${credential?.username}</td>
+                            <td>${credential?.password}</td>
+                            <td>${credential?.url}</td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById("credentialTable").innerHTML = credentialRows;
+                } catch (error) {
+                    console.error("Fetch error.", error);
+                }
+            }
+            fetchFilenames();
+            fetchCredentials();
             async function validateUploadFile() {
                 try {
                     const files = document.getElementById("fileUpload")?.files;
@@ -47,6 +81,24 @@
                     console.error("Validate Error: ", error);
                     return false;
                 }
+            }
+
+            async function deleteFile(filename) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+                const response = await fetch(`/api/delete-file/${encodeURIComponent(filename)}`, {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    }
+                });
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+
+                console.log(data);
+                fetchFilenames();
             }
         </script>
     </head>
@@ -171,7 +223,7 @@
 
                         <div class="table-responsive">
                             <table class="table table-striped" th:object="${credentials}" id="credentialTable">
-                                <thead>
+                                {% comment %} <thead>
                                     <tr>
                                         <th style="width: 20%" scope="col"></th>
                                         <th style="width: 35%" scope="col">URL</th>
@@ -189,7 +241,7 @@
                                     <td>Example Credential Username</td>
                                     <td>Example Credential Password</td>
                                 </tr>
-                                </tbody>
+                                </tbody> {% endcomment %}
                             </table>
                         </div>
 
@@ -203,8 +255,8 @@
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" method="POST">
-                                            <input type="hidden" name="credentialId" id="credential-id">
+                                        <form action="#" th:action="@{/create-credential}" method="POST">
+                                            <input type="hidden" name="credentialid" id="credential-id">
                                             <div class="form-group">
                                                 <label for="credential-url" class="col-form-label">URL</label>
                                                 <input type="text" name= "url" class="form-control" id="credential-url" maxlength="100" required>

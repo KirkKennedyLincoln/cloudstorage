@@ -8,19 +8,29 @@ CREATE TABLE IF NOT EXISTS USERS (
 );
 
 CREATE TABLE IF NOT EXISTS NOTES (
-    noteid serial PRIMARY KEY,
-    notetitle VARCHAR(20),
-    notedescription VARCHAR (1000),
-    userid INT,
-    foreign key (userid) references USERS(userid)
+  noteid serial PRIMARY KEY,
+  notetitle VARCHAR(20),
+  notedescription VARCHAR (1000),
+  userid INT,
+  foreign key (userid) references USERS(userid)
 );
 
 CREATE TABLE IF NOT EXISTS FILES (
-    fileId serial PRIMARY KEY,
-    filename VARCHAR,
-    contenttype VARCHAR,
-    filesize VARCHAR,
-    userid INT,
-    filedata BYTEA,
-    foreign key (userid) references USERS(userid)
+  fileId serial PRIMARY KEY,
+  filename VARCHAR,
+  contenttype VARCHAR,
+  filesize VARCHAR,
+  userid INT,
+  filedata BYTEA,
+  foreign key (userid) references USERS(userid)
 );
+
+CREATE TABLE IF NOT EXISTS CREDENTIALS (                                                                                                                                                                                                                    
+  credentialid SERIAL PRIMARY KEY,                                                                                                                                                                                                                        
+  url VARCHAR(100),                                                                                                                                                                                                                                       
+  username VARCHAR(30),                                                                                                                                                                                                                                   
+  credentialkey VARCHAR(100),                                                                                                                                                                                                                                       
+  password VARCHAR(100),                                                                                                                                                                                                                                  
+  userid INT,                                                                                                                                                                                                                                             
+  FOREIGN KEY (userid) REFERENCES USERS(userid)                                                                                                                                                                                                           
+);    

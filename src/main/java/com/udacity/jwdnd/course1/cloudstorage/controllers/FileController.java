@@ -60,15 +60,6 @@ public class FileController {
             .contentLength(data.length) 
             .body(data);
     }
-
-    @PostMapping("/delete-file/{filename}")
-    public String postMethodName(@RequestParam("filename") String filename) {
-        if (this.fileService.removeFile(filename)) {
-            return "/home";
-        }
-
-        return "/home";
-    }
     
 
     @PostMapping("/upload")
@@ -84,6 +75,9 @@ public class FileController {
 
         File file = this.fileService.fetchFile(filePart.getOriginalFilename());
         String newFilename = filePart.getOriginalFilename();
+        if (newFilename == new String()) {
+            return "/home";
+        }
         if (file != null) {
             // throw new IOException();
             List<String> filenames = this.fileService.fetchAllFilenamesLike(filePart.getOriginalFilename());
