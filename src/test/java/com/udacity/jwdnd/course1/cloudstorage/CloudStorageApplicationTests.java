@@ -94,10 +94,12 @@ class CloudStorageApplicationTests {
 		WebElement buttonSignUp = driver.findElement(By.id("buttonSignUp"));
 		buttonSignUp.click();
 
-		/* Check that the sign up was successful. 
-		// You may have to modify the element "success-msg" and the sign-up 
+		/* Check that the sign up was successful.
+		// You may have to modify the element "success-msg" and the sign-up
 		// success message below depening on the rest of your code.
 		*/
+		webDriverWait.until(ExpectedConditions.titleContains("Login"));
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("success-msg")));
 		Assertions.assertTrue(driver.findElement(By.id("success-msg")).getText().contains("You successfully signed up!"));
 	}
 
@@ -212,16 +214,161 @@ class CloudStorageApplicationTests {
 
 	}
 
+	public void createNote() throws InterruptedException {
+		doMockSignUp("Note","Test","NoteUser","123");
+		doLogIn("NoteUser", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=notes");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement addNewNote = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("addNewNote")));
+		addNewNote.click();
+
+		WebElement noteTitle = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
+		noteTitle.click();
+		noteTitle.sendKeys("TestNote");
+
+		WebElement noteDescription = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description")));
+		noteDescription.click();
+		noteDescription.sendKeys("Test Description");
+
+		WebElement noteSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesNotes")));
+		noteSubmit.click();
+
+		WebElement noteShown = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("TestNote")));
+		Assertions.assertTrue(!driver.findElements(By.id("TestNote")).isEmpty());
+	}
+
+	public void createCredential() throws InterruptedException {
+		doMockSignUp("Credential","Test","CredentialUser","123");
+		doLogIn("CredentialUser", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=credentials");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement addNewCredential = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("addNewCredential")));
+		addNewCredential.click();
+
+		WebElement credentialUrl = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		credentialUrl.click();
+		credentialUrl.sendKeys("TestUrl");
+
+		WebElement credentialUsername = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		credentialUsername.click();
+		credentialUsername.sendKeys("TestUsername");
+
+		WebElement credentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		credentialPassword.click();
+		credentialPassword.sendKeys("TestPassword");
+
+		WebElement credentialSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesCredentials")));
+		credentialSubmit.click();
+
+		WebElement credentialShown = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("TestUrl")));
+		Assertions.assertTrue(!driver.findElements(By.id("TestUrl")).isEmpty());
+	}
+
+	public void updateNote() throws InterruptedException {
+		doLogIn("NoteUser", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=notes");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement updateNote = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("editNote+TestNote")));
+		updateNote.click();
+
+		WebElement noteTitle = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
+		noteTitle.click();
+		noteTitle.sendKeys("123");
+
+		WebElement noteDescription = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-description")));
+		noteDescription.click();
+		noteDescription.sendKeys(" 123");
+
+		WebElement noteSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesNotes")));
+		noteSubmit.click();
+
+		Thread.sleep(1000);
+		Assertions.assertTrue(!driver.findElements(By.id("TestNote123")).isEmpty());
+	}
+
+	public void updateCredential() throws InterruptedException {
+		doLogIn("CredentialUser", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=credentials");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+
+		WebElement updateCredential = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("editCredential+TestUrl")));
+		updateCredential.click();
+		
+		WebElement credentialUrl = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		credentialUrl.click();
+		credentialUrl.sendKeys("123");
+
+		WebElement credentialUsername = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		credentialUsername.click();
+		credentialUsername.sendKeys("123");
+
+		WebElement credentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		credentialPassword.click();
+		credentialPassword.sendKeys("123");
+
+		WebElement credentialSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesCredentials")));
+		credentialSubmit.click();
+
+		Thread.sleep(1000);
+		Assertions.assertTrue(!driver.findElements(By.id("TestUrl123")).isEmpty());
+	}
+
+	public void deleteNote() throws InterruptedException {
+		doLogIn("NoteUser", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=notes");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement deleteNote = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteNote+TestNote123")));
+		deleteNote.click();
+
+		Thread.sleep(1000);
+
+		Assertions.assertTrue(driver.findElements(By.id("TestNote123")).isEmpty());
+	}
+
+	public void deleteCredential() throws InterruptedException {
+		doLogIn("CredentialUser", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=credentials");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement deleteCredential = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("deleteCredential+TestUrl123")));
+		deleteCredential.click();
+
+		Thread.sleep(1000);
+
+		Assertions.assertTrue(driver.findElements(By.id("TestUrl123")).isEmpty());
+	}
+	
+	@Test
+	public void crudNote() throws InterruptedException {
+		createNote();
+		updateNote();
+		deleteNote();
+	}
 
 	@Test
-	public void createNote() {}
+	public void crudCredential() throws InterruptedException {
+		createCredential();
+		//updateCredential();
+		deleteCredential();
+	}
 
-	@Test
-	public void createCredential() {}
+	// @Test
+	// public void readNote() {
+	// 	doLogIn("UT", "123");
+	// }
 
-	@Test
-	public void deleteNote() {}
-
-	@Test
-	public void deleteCredential() {}
+	// @Test
+	// public void readCredential() {
+	// 	doLogIn("UT", "123");
+	// }
 }

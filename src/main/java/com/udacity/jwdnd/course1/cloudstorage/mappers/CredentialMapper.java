@@ -17,18 +17,18 @@ public interface CredentialMapper {
         "VALUES (#{url}, #{username}, #{credentialkey}, #{password}, #{userid})")
     public Boolean storeCredentials(Credential credential);
 
-    @Select("SELECT url, username, credentialkey, password, userid WHERE url = #{url} AND userid = #{userId}")
+    @Select("SELECT credentialid, url, username, credentialkey, password, userid FROM CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
     public Credential retrieveCredentials(String url, Integer userId);
 
-    @Select("SELECT credentialkey WHERE url = #{url} AND userid = #{userId}")
+    @Select("SELECT credentialkey FROM CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
     public String retrieveCredentialKey(String url, Integer userId);
 
-    @Select("SELECT url, username, password FROM CREDENTIALS WHERE userid = #{userId}")
+    @Select("SELECT credentialid, url, username, password FROM CREDENTIALS WHERE userid = #{userId}")
     public Credential[] retrieveAllCredentials(Integer userId);
 
     @Delete("DELETE FROM CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
     public Boolean deleteCredentials(String url, Integer userId);
 
-    @Update("UPDATE CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
-    public Boolean updateCredentials(Credential credential, Integer userId);
+    @Update("UPDATE CREDENTIALS SET url = #{credential.url}, username = #{credential.username}, password = #{credential.password} WHERE credentialid = #{credential.credentialid}")
+    public Boolean updateCredentials(@Param("credential") Credential credential);
 }

@@ -52,16 +52,18 @@
 
                             <td>
                                 <a target="_blank" onclick="showCredentialModal('${credential}')" class="btn btn-success">View</a>
-                                <button type="button" class="btn btn-success">Edit</button>
-                                <a  class="btn btn-danger" onclick="deleteCredential('${credential?.url}')">Delete</a>
+                                <button id="editCredential+${credential?.url}" type="button" onclick="showCredentialEditModal('${credential?.credentialid}', '${credential?.url}', '${credential?.username}', '${credential?.password}')" class="btn btn-success">Edit</button>
+                                <a id="deleteCredential+${credential?.url}" class="btn btn-danger" onclick="deleteCredential('${credential?.url}')">Delete</a>
                             </td>
                             <td>${credential?.username}</td>
-                            <td>${credential?.password}</td>
-                            <td>${credential?.url}</td>
+                            <td><input type="password" value="${credential?.password}" readonly>    <button class="toggle-eye" onclick="togglePassword(this)">👁️</button></td>
+                            <td id=${credential?.url}>${credential?.url}</td>
                         </tr>
                     `).join('');
 
                     document.getElementById("credentialTable").innerHTML = credentialRows;
+
+
                 } catch (error) {
                     console.error("Fetch error.", error);
                 }
@@ -76,10 +78,10 @@
                     const noteRows = data.map(note => `                                                                                                                                                                                                                         
                         <tr>                                                                                                                                                                                                                                                    
                             <td>                                                                                                                                                                                                                                                
-                                <button type="button" onclick="showNoteEditModal('${note?.noteid}', '${note?.notetitle}', '${note?.notedescription}')" class="btn btn-success">Edit</button>                                                                                        
-                                <a class="btn btn-danger" onclick="deleteNote('${note?.notetitle}')">Delete</a>                                                                                                                                                                 
+                                <button id="editNote+${note?.notetitle}" type="button" onclick="showNoteEditModal('${note?.noteid}', '${note?.notetitle}', '${note?.notedescription}')" class="btn btn-success">Edit</button>                                                                                        
+                                <a id="deleteNote+${note?.notetitle}" class="btn btn-danger" onclick="deleteNote('${note?.notetitle}')">Delete</a>                                                                                                                                                                 
                             </td>                                                                                                                                                                                                                                               
-                            <td>${note?.notetitle}</td>                                                                                                                                                                                                                         
+                            <td id=${note?.notetitle}>${note?.notetitle}</td>                                                                                                                                                                                                                         
                             <td>${note?.notedescription}</td>                                                                                                                                                                                                                   
                         </tr>                                                                                                                                                                                                                                                   
                     `).join(''); 
@@ -215,7 +217,7 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-notes" role="tabpanel" aria-labelledby="nav-notes-tab">
-                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showNoteModal()">
+                        <button id="addNewNote" style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showNoteModal()">
                             + Add a New Note
                         </button>
 
@@ -269,7 +271,7 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="$('#noteSubmit').click();">Save changes</button>
+                                        <button id="saveChangesNotes" type="button" class="btn btn-primary" onclick="$('#noteSubmit').click();">Save changes</button>
                                     </div>
                                 </div>
                             </div>
@@ -295,18 +297,18 @@
                                                 <label for="note-description" class="col-form-label">Description</label>
                                                 <textarea class="form-control" name="notedescription" id="note-description" rows="5" maxlength="1000" required></textarea>
                                             </div>
-                                            <button id="noteSubmit" type="submit" class="d-none"></button>
+                                            <button id="noteUpdateSubmit" type="submit" class="d-none"></button>
                                         </form>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="$('#noteSubmit').click();">Save changes</button>
+                                        <button id="saveChangesUpdateNotes" type="button" class="btn btn-primary" onclick="$('#noteUpdateSubmit').click();">Save changes</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     <div class="tab-pane fade" id="nav-credentials" role="tabpanel" aria-labelledby="nav-credentials-tab">
-                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showCredentialModal()">
+                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" id="addNewCredential" onclick="showCredentialModal()">
                             + Add a New Credential
                         </button>
 
@@ -363,7 +365,42 @@
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" onclick="$('#credentialSubmit').click();">Save changes</button>
+                                        <button id="saveChangesCredentials" type="button" class="btn btn-primary" onclick="$('#credentialSubmit').click();">Save changes</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="credentialEditModal" tabindex="-1" role="dialog" aria-labelledby="credentialModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="credentialModalLabel">Credential</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="#" th:action="@{/update-credential}" method="POST">
+                                            <input type="hidden" name="credentialid" id="credential-id">
+                                            <div class="form-group">
+                                                <label for="credential-url" class="col-form-label">URL</label>
+                                                <input type="text" name= "url" class="form-control" id="credential-url" maxlength="100" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="credential-username" class="col-form-label">Username</label>
+                                                <input type="text" name= "username" class="form-control" id="credential-username" maxlength="30" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="credential-password" class="col-form-label">Password</label>
+                                                <input type="text" name= "password" class="form-control" id="credential-password" maxlength="30" required>
+                                            </div>
+                                            <button id="credentialUpdateSubmit" type="submit" class="d-none"></button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button id="saveChangesCredentials" type="button" class="btn btn-primary" onclick="$('#credentialUpdateSubmit').click();">Save changes</button>
                                     </div>
                                 </div>
                             </div>
@@ -407,6 +444,13 @@
                 $('#credential-url').val(url ? url : '');
                 $('#credential-username').val(username ? username : '');
                 $('#credential-password').val(password ? password : '');
+                $('#credentialModal').modal('show');
+            }
+            function showCredentialEditModal(credId, credUrl, credUsername, credPassword) {
+                $('#credential-id').val(credId ? credId : '');
+                $('#credential-url').val(credUrl ? credUrl : '');
+                $('#credential-username').val(credUsername ? credUsername : '');
+                $('#credential-password').val(credPassword ? credPassword : '');
                 $('#credentialModal').modal('show');
             }
 

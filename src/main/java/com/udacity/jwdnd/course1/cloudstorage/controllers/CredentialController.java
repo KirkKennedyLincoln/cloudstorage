@@ -107,9 +107,31 @@ public class CredentialController {
             model.addAttribute("credentialError", "User not authenticated");
             return "/home";
         }
-        credential.setCredentialkey(UUID.randomUUID().toString());
-        this.credentialService.addCredentials(credential, user.getUsername());
+        if (credential.getCredentialid() != null) {
+            this.credentialService.updateCredential(credential, user.getUsername());
+        } else {
+            credential.setCredentialkey(UUID.randomUUID().toString());
+            this.credentialService.addCredentials(credential, user.getUsername());
+        }
         return "redirect:/home?tab=credentials";
     }
+
+    @PostMapping("/update-credential")
+    public String updateCredential(
+        @ModelAttribute Credential credential,
+        Model model
+    ) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        if (null == user) {
+            model.addAttribute("credentialError", "User not authenticated");
+            return "/home";
+        }
+        credential.setCredentialkey(UUID.randomUUID().toString());
+        this.credentialService.updateCredential(credential, user.getUsername());
+
+        return "redirect:/home?tab=credentials";
+    }
+    
 
 }

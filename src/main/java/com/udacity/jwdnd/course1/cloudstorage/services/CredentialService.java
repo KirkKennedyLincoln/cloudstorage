@@ -37,8 +37,7 @@ public class CredentialService {
     }
 
     public Boolean updateCredential(Credential credential, String username) {
-        Integer userId = this.userMapper.getUserIdByUsername(username);
-        return this.credentialMapper.updateCredentials(credential, userId);
+        return this.credentialMapper.updateCredentials(credential);
     }
 
     public Credential[] getAllCredentials(String username) {
