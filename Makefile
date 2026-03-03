@@ -9,3 +9,7 @@ restore:
 .PHONY: read
 read:
 	docker exec -i cloudstorage-db psql -U postgres -d registration -c "SELECT * FROM NOTES"                                                                                                                                                              
+
+.PHONY: all
+all:
+	make rake && make restore && mvn clean install

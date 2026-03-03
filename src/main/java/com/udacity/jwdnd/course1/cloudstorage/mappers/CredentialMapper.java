@@ -23,12 +23,12 @@ public interface CredentialMapper {
     @Select("SELECT credentialkey FROM CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
     public String retrieveCredentialKey(String url, Integer userId);
 
-    @Select("SELECT credentialid, url, username, password FROM CREDENTIALS WHERE userid = #{userId}")
+    @Select("SELECT credentialid, url, username, credentialkey, password FROM CREDENTIALS WHERE userid = #{userId}")
     public Credential[] retrieveAllCredentials(Integer userId);
 
     @Delete("DELETE FROM CREDENTIALS WHERE url = #{url} AND userid = #{userId}")
     public Boolean deleteCredentials(String url, Integer userId);
 
-    @Update("UPDATE CREDENTIALS SET url = #{credential.url}, username = #{credential.username}, password = #{credential.password} WHERE credentialid = #{credential.credentialid}")
+    @Update("UPDATE CREDENTIALS SET url = #{credential.url}, username = #{credential.username}, credentialkey = #{credential.credentialkey}, password = #{credential.password} WHERE credentialid = #{credential.credentialid}")
     public Boolean updateCredentials(@Param("credential") Credential credential);
 }

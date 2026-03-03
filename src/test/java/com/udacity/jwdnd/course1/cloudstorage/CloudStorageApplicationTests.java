@@ -14,6 +14,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 import java.io.File;
 import java.time.Duration;
+import java.util.List;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -214,6 +215,116 @@ class CloudStorageApplicationTests {
 
 	}
 
+	@Test
+	public void unauthorizedUsersDeniedAccess() {
+		driver.get("http://localhost:" + this.port + "/login");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		Assertions.assertTrue(webDriverWait.until(ExpectedConditions.titleContains("Login")));
+
+		driver.get("http://localhost:" + this.port + "/signup");
+		Assertions.assertTrue(webDriverWait.until(ExpectedConditions.titleContains("Sign Up")));
+
+		driver.get("http://localhost:" + this.port + "/home");
+		Assertions.assertFalse(driver.getTitle().contains("Home"));
+
+		driver.get("http://localhost:" + this.port + "/error");
+		Assertions.assertFalse(driver.getTitle().contains("Error"));
+
+		driver.get("http://localhost:" + this.port + "/result");
+		Assertions.assertFalse(driver.getTitle().contains("Result"));
+
+		driver.get("http://localhost:" + this.port + "/home?tab=files");
+		Assertions.assertFalse(driver.getTitle().contains("Home"));
+		
+		driver.get("http://localhost:" + this.port + "/home?tab=notes");
+		Assertions.assertFalse(driver.getTitle().contains("Home"));
+
+		driver.get("http://localhost:" + this.port + "/home?tab=credentials");
+		Assertions.assertFalse(driver.getTitle().contains("Home"));
+	}
+
+	@Test
+	public void testLoginAndLogout() {
+		doMockSignUp("Login", "Logout", "LoginLogout", "123");
+		doLogIn("LoginLogout", "123");
+
+		driver.get("http://localhost:" + this.port + "/home");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+
+		WebElement logout = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id(("logout"))));
+		logout.click();
+
+		Assertions.assertTrue(driver.getTitle().contains("Login"));
+	}
+
+	@Test
+	public void verifyEncryptedCredentials() {
+		doMockSignUp("Encrypto", "Man", "Encrypto", "123");
+		doLogIn("Encrypto", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=credentials");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement addNewCredential = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("addNewCredential")));
+		addNewCredential.click();
+
+		WebElement credentialUrl = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		credentialUrl.click();
+		credentialUrl.sendKeys("TestUrlEncrypted");
+
+		WebElement credentialUsername = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		credentialUsername.click();
+		credentialUsername.sendKeys("TestUsernameEncrypted");
+
+		WebElement credentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		credentialPassword.click();
+		credentialPassword.sendKeys("TestPasswordEncrypted");
+
+		WebElement credentialSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesCredentials")));
+		credentialSubmit.click();
+
+		List<WebElement> encryptos = webDriverWait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(By.id(("reveal"))));
+		for (WebElement ec : encryptos)  {
+			String value = ec.getAttribute("value");
+			Assertions.assertFalse(value.equals("TestPasswordEncrypted"));
+		}
+	}
+
+	@Test
+	public void verifyDecryptedCredentials() {
+		doMockSignUp("Decrypto", "Man", "Decrypto", "123");
+		doLogIn("Decrypto", "123");
+
+		driver.get("http://localhost:" + this.port + "/home?tab=credentials");
+		WebDriverWait webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		
+		WebElement addNewCredential = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("addNewCredential")));
+		addNewCredential.click();
+
+		WebElement credentialUrl = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		credentialUrl.click();
+		credentialUrl.sendKeys("TestUrlDecrypted");
+
+		WebElement credentialUsername = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		credentialUsername.click();
+		credentialUsername.sendKeys("TestUsernameDecrypted");
+
+		WebElement credentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		credentialPassword.click();
+		credentialPassword.sendKeys("TestPasswordDecrypted");
+
+		WebElement credentialSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesCredentials")));
+		credentialSubmit.click();
+
+		WebElement editButton = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("editCredential+TestUrlDecrypted")));
+		editButton.click();
+
+		WebElement decryptedCredentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-edit-password")));
+		String candidatePassword = decryptedCredentialPassword.getDomProperty("value");
+
+		Assertions.assertTrue(candidatePassword.equals("TestPasswordDecrypted"));
+	}
+
 	public void createNote() throws InterruptedException {
 		doMockSignUp("Note","Test","NoteUser","123");
 		doLogIn("NoteUser", "123");
@@ -301,19 +412,19 @@ class CloudStorageApplicationTests {
 		WebElement updateCredential = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("editCredential+TestUrl")));
 		updateCredential.click();
 		
-		WebElement credentialUrl = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		WebElement credentialUrl = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-edit-url")));
 		credentialUrl.click();
 		credentialUrl.sendKeys("123");
 
-		WebElement credentialUsername = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-username")));
+		WebElement credentialUsername = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-edit-username")));
 		credentialUsername.click();
 		credentialUsername.sendKeys("123");
 
-		WebElement credentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-password")));
+		WebElement credentialPassword = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-edit-password")));
 		credentialPassword.click();
 		credentialPassword.sendKeys("123");
 
-		WebElement credentialSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesCredentials")));
+		WebElement credentialSubmit = webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("saveChangesUpdatesCredentials")));
 		credentialSubmit.click();
 
 		Thread.sleep(1000);
@@ -358,7 +469,7 @@ class CloudStorageApplicationTests {
 	@Test
 	public void crudCredential() throws InterruptedException {
 		createCredential();
-		//updateCredential();
+		updateCredential();
 		deleteCredential();
 	}
 

@@ -75,8 +75,8 @@ public class FileController {
 
         File file = this.fileService.fetchFile(filePart.getOriginalFilename());
         String newFilename = filePart.getOriginalFilename();
-        if (newFilename == new String()) {
-            return "/home";
+        if (newFilename == null || newFilename.isEmpty()) {
+            return "redirect:/home";
         }
         if (file != null) {
             // throw new IOException();
@@ -84,12 +84,15 @@ public class FileController {
             newFilename = file.getFilename() + " (" + (filenames.size()) + ")";
         }
 
-        Path targetPath = Paths.get("target", "files").resolve(newFilename);
+        Path targetDir = Paths.get("target", "files");
+        Files.createDirectories(targetDir);  // Create directory if it doesn't exist
+        Path targetPath = targetDir.resolve(newFilename);
         System.out.println(targetPath);
         try (InputStream inputStream = filePart.getInputStream(); OutputStream outputStream = Files.newOutputStream(targetPath)) {
             inputStream.transferTo(outputStream);
         } catch (Exception e) {
-            return "/home";
+            e.printStackTrace();  // Log the actual error
+            return "redirect:/home";
         }
             
         byte[] fileBytes = Files.readAllBytes(targetPath);

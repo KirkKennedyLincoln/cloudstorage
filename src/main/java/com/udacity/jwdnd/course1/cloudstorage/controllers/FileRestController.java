@@ -33,21 +33,19 @@ public class FileRestController {
     }
 
     @GetMapping("/api/file-content")
-    public ResponseEntity<byte[]> getFileContent(@RequestParam String filename) {
+    public ResponseEntity<String> getFileContent(@RequestParam String filename) {
         File file = this.fileService.fetchFile(filename);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }
 
         byte[] data = file.getFiledata();
-        String content = file.getContenttype();
-        
+        String textContent = new String(data);
+
         System.out.println(file.getFilename());
         return ResponseEntity.ok()
-            .header("Content-Disposition", "attachment; filename=\"" + file.getFilename() + "\"")
-            .contentType(org.springframework.http.MediaType.parseMediaType(content))
-            .contentLength(data.length)
-            .body(data);
+            .contentType(org.springframework.http.MediaType.TEXT_PLAIN)
+            .body(textContent);
     }
 
     @PostMapping("/api/delete-file/{filename}")

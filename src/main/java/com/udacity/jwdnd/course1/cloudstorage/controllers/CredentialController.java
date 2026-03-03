@@ -1,7 +1,8 @@
 package com.udacity.jwdnd.course1.cloudstorage.controllers;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
 
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.util.Base64;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -110,7 +111,12 @@ public class CredentialController {
         if (credential.getCredentialid() != null) {
             this.credentialService.updateCredential(credential, user.getUsername());
         } else {
-            credential.setCredentialkey(UUID.randomUUID().toString());
+            // Help from Claude to change up my hashing strat
+            SecureRandom random = new SecureRandom();
+            byte[] key = new byte[16];
+            random.nextBytes(key);
+            String encodedKey = Base64.getEncoder().encodeToString(key);
+            credential.setCredentialkey(encodedKey);
             this.credentialService.addCredentials(credential, user.getUsername());
         }
         return "redirect:/home?tab=credentials";
@@ -127,11 +133,30 @@ public class CredentialController {
             model.addAttribute("credentialError", "User not authenticated");
             return "/home";
         }
-        credential.setCredentialkey(UUID.randomUUID().toString());
+        SecureRandom random = new SecureRandom();
+        byte[] key = new byte[16];
+        random.nextBytes(key);
+        String encodedKey = Base64.getEncoder().encodeToString(key);
+        credential.setCredentialkey(encodedKey);
         this.credentialService.updateCredential(credential, user.getUsername());
 
         return "redirect:/home?tab=credentials";
     }
     
+    @PostMapping("/encrypt-credential")
+    public String encryptCredential(
+        @ModelAttribute Credential credential,
+        Model model
+    ) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User user = (User) auth.getPrincipal();
+        if (null == user) {
+            model.addAttribute("credentialError", "User not authenticated");
+            return "/home";
+        }
 
+        this.credentialService.encryptPassword(credential.getPassword(), credential.getCredentialkey());
+
+        return "redirect:/home?tab=credentials";
+    }
 }

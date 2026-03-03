@@ -9,20 +9,29 @@ import com.udacity.jwdnd.course1.cloudstorage.models.Credential;
 @Service
 public class CredentialService {
 
+    private final EncryptionService encryptionService;
     private final CredentialMapper credentialMapper;
     private final UserMapper userMapper;
 
     public CredentialService(
         CredentialMapper credentialMapper,
-        UserMapper userMapper
+        UserMapper userMapper, 
+        EncryptionService encryptionService
     ) {
         this.credentialMapper = credentialMapper;
         this.userMapper = userMapper;
+        this.encryptionService = encryptionService;
     }
 
     public Boolean addCredentials(Credential credential, String username) {
         Integer userId = this.userMapper.getUserIdByUsername(username);
         credential.setUserid(userId);
+        credential.setPassword(
+            this.encryptionService.encryptValue(
+                credential.getPassword(), 
+                credential.getCredentialkey()
+            )
+        );
         return this.credentialMapper.storeCredentials(credential);
     }
 
@@ -37,11 +46,25 @@ public class CredentialService {
     }
 
     public Boolean updateCredential(Credential credential, String username) {
+        credential.setPassword(
+            this.encryptionService.encryptValue(
+                credential.getPassword(),
+                credential.getCredentialkey()
+            )
+        );
         return this.credentialMapper.updateCredentials(credential);
     }
 
     public Credential[] getAllCredentials(String username) {
         Integer userId = this.userMapper.getUserIdByUsername(username);
         return this.credentialMapper.retrieveAllCredentials(userId);
+    }
+
+    public String encryptPassword(String password, String key) {
+        return this.encryptionService.encryptValue(password, key);
+    }
+
+    public String decryptPassword(String password, String key) {
+        return this.encryptionService.decryptValue(password, key);
     }
 }
